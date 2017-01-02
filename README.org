@@ -1,0 +1,21 @@
+#+TITLE: Subscribah
+
+This is a microservice for email subscriptions.
+
+* Running
+
+#+BEGIN_SRC sh
+  docker run --name subscribah-db -d \
+	 -e POSTGRES_PASSWORD=dbpassword \
+	 -e POSTGRES_DB=subscriber \
+	 postgres
+#+END_SRC
+
+#+BEGIN_SRC sh
+  docker run --name subscribah-gunicorn \
+	 --link subscribah-db:db \
+	 --env DB_PASSWORD=dbpassword \
+	 --env SECRET_KEY=blah-blah-blah \
+	 -p 127.0.0.1:5000:80 \
+	 -d arecker/subscribah:latest
+#+END_SRC

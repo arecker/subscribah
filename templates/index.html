@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block message %}
+<p>
+  I'll send you an email every time I do something new.
+</p>
+<p>
+  Don't worry - if you get sick of it, you can unsubscribe using a
+  personal link at the bottom of each email.
+</p>
+{% endblock %}
+{% block body %}
+<hr/>
+<form method="POST" action="/">
+  {{ form.csrf_token }}
+  <p>
+    <label>{{ form.email.label }}</label>
+    {{ form.email(size=20) }}
+  </p>
+  {% for error in get_flashed_messages() %}
+  <p>{{ error }}</p>
+  {% endfor %}
+  <input type="submit">
+</form>
+{% endblock %}
