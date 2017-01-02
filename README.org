@@ -12,10 +12,11 @@ This is a microservice for email subscriptions.
 #+END_SRC
 
 #+BEGIN_SRC sh
-  docker run --name subscribah-gunicorn \
+  docker run --name subscribah \
 	 --link subscribah-db:db \
 	 --env DB_PASSWORD=dbpassword \
 	 --env SECRET_KEY=blah-blah-blah \
-	 -p 127.0.0.1:5000:80 \
+	 --env SMTP_USER=you@gmail.com \
+	 --env SMTP_PASSWORD=yourpassword \
 	 -d arecker/subscribah:latest
 #+END_SRC

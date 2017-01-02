@@ -2,9 +2,14 @@ from __future__ import unicode_literals
 
 import os
 from uuid import uuid4
+from urlparse import urljoin
 
-from flask import Flask, render_template, redirect, flash, request
+from flask import (
+    Flask, render_template, redirect,
+    flash, request, url_for
+)
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail, Message
 from sqlalchemy_utils import UUIDType
 from wtforms_alchemy import ModelForm
 
@@ -14,7 +19,7 @@ DEFAULT_SETTINGS = os.path.join(HERE, 'config/default.py')
 
 app = Flask(__name__)
 app.config.from_pyfile(os.environ.get('SETTINGS_PATH', DEFAULT_SETTINGS))
-
+mail = Mail(app)
 db = SQLAlchemy(app)
 
 
@@ -45,6 +50,28 @@ class Subscriber(db.Model):
 
         self.verified = True
 
+    def send_verification_email(self):
+        link = url_for('verify', key=self.verify_key)
+        return send_email(
+            subject='Could you verify your email?',
+            recipient=self.email,
+            template='verify.msg',
+            context={'link': link}
+        )
+
+    def send_newsletter_email(self, subject, message, connection):
+        link = url_for('unsubscribe', key=self.unsubscribe_key)
+        return send_email(
+            subject=subject,
+            recipient=self.email,
+            template='newsletter.msg',
+            context={
+                'link': link,
+                'message': message
+            },
+            connection=connection
+        )
+
 
 class SubscriberForm(ModelForm):
     class Meta:
@@ -56,6 +83,15 @@ class SubscriberForm(ModelForm):
         return db.session
 
 
+def send_email(subject, recipient, template, context={}, connection=None):
+    connection = connection or mail
+    connection.send(Message(
+        subject=subject,
+        recipients=[recipient],
+        body=render_template(template, **context)
+    ))
+
+
 @app.route('/', methods=('GET', 'POST'))
 def index():
     form = SubscriberForm(request.form)
@@ -65,6 +101,7 @@ def index():
             subscriber = Subscriber(form.data['email'])
             db.session.add(subscriber)
             db.session.commit()
+            subscriber.send_verification_email()
             return redirect('/confirm/')
 
     for error in form.errors.get('email', []):
@@ -87,7 +124,7 @@ def verify(key):
     return render_template('verified.html')
 
 
-@app.route('/remove/<uuid:key>/')
+@app.route('/unsubscribe/<uuid:key>/')
 def unsubscribe(key):
     subscriber = Subscriber.query.filter_by(unsubscribe_key=key).first_or_404()
     db.session.delete(subscriber)

@@ -10,6 +10,8 @@ COPY templates /app/templates
 COPY config /app/config
 COPY entry.sh /
 
+COPY newsletter.py /app
+
 EXPOSE 80
 ENV SETTINGS_PATH='/app/config/prod.py'
 ENTRYPOINT ["/entry.sh"]
