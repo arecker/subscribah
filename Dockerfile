@@ -7,7 +7,9 @@ RUN pip install -r /app/requirements.txt
 
 COPY subscribah.py /app
 COPY templates /app/templates
+COPY config /app/config
 COPY entry.sh /
 
 EXPOSE 80
+ENV SETTINGS_PATH='/app/config/prod.py'
 ENTRYPOINT ["/entry.sh"]

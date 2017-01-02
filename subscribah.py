@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from os import environ
+import os
 from uuid import uuid4
 
 from flask import Flask, render_template, redirect, flash, request
@@ -9,16 +9,13 @@ from sqlalchemy_utils import UUIDType
 from wtforms_alchemy import ModelForm
 
 
+HERE = os.path.dirname(os.path.realpath(__file__))
+DEFAULT_SETTINGS = os.path.join(HERE, 'config/default.py')
+
 app = Flask(__name__)
-app.secret_key = environ.get('SECRET_KEY', 'mail-o-mail-it-never-fails')
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    'postgresql://'
-    '{user}:{password}@'
-    '{host}:{port}/{table}'
-).format(user='postgres', password=environ['DB_PASSWORD'],
-         host='db', port='5432', table='subscriber')
+app.config.from_pyfile(os.environ.get('SETTINGS_PATH', DEFAULT_SETTINGS))
+
 db = SQLAlchemy(app)
-db.create_all()
 
 
 class Subscriber(db.Model):
@@ -99,4 +96,5 @@ def unsubscribe(key):
 
 
 if __name__ == '__main__':
+    db.create_all()
     app.run(debug=True)
