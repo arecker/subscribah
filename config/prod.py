@@ -2,7 +2,7 @@ from os import environ
 
 DEBUG = False
 SECRET_KEY = environ['SECRET_KEY']
-SERVER_NAME = 'alexrecker.com'
+SERVER_NAME = environ.get('SERVER_NAME', 'alexrecker.com')
 APPLICATION_ROOT = '/subscribe/'
 SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:{}@db:5432/subscriber'.format(environ['DB_PASSWORD'])
 SQLALCHEMY_TRACK_MODIFICATIONS = False
