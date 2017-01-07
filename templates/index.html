@@ -10,7 +10,7 @@
 {% endblock %}
 {% block body %}
 <hr/>
-<form method="POST" action="{{ url_for('index') }}">
+<form method="POST" action="">
   {{ form.csrf_token }}
   <p>
     <label>{{ form.email.label }}</label>
