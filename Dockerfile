@@ -7,11 +7,11 @@ RUN pip install -r /app/requirements.txt
 
 COPY subscribah.py /app
 COPY templates /app/templates
-COPY config /app/config
-COPY entry.sh /
+COPY wsgi.py /app
 
 COPY newsletter.py /app
 
 EXPOSE 80
-ENV SETTINGS_PATH='/app/config/prod.py'
-ENTRYPOINT ["/entry.sh"]
+WORKDIR /app
+ENTRYPOINT ["gunicorn"]
+CMD ["--bind", "0.0.0.0:80", "wsgi:application"]

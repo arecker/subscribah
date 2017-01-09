@@ -11,6 +11,9 @@ This is a microservice for email subscriptions.
 	 postgres
 #+END_SRC
 
+#+RESULTS:
+: d3311ab8bc82ce3815a922b4ae58e873be00fd78870e31314200d726a90e2958
+
 #+BEGIN_SRC sh
   docker run --name subscribah \
 	 --link subscribah-db:db \

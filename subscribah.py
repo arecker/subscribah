@@ -1,8 +1,7 @@
 from __future__ import unicode_literals
 
-import os
+from os import environ
 from uuid import uuid4
-from urlparse import urljoin
 
 from flask import (
     Flask, render_template, redirect,
@@ -14,11 +13,17 @@ from sqlalchemy_utils import UUIDType
 from wtforms_alchemy import ModelForm
 
 
-HERE = os.path.dirname(os.path.realpath(__file__))
-DEFAULT_SETTINGS = os.path.join(HERE, 'config/default.py')
-
 app = Flask(__name__)
-app.config.from_pyfile(os.environ.get('SETTINGS_PATH', DEFAULT_SETTINGS))
+app.config.update(
+    SQLALCHEMY_TRACK_MODIFICATIONS=False,
+    MAIL_SERVER='smtp.gmail.com',
+    MAIL_PORT=465,
+    MAIL_USE_SSL=True,
+    MAIL_USERNAME='alex@reckerfamily.com',
+    MAIL_PASSWORD=environ['SMTP_PASSWORD'],
+    MAIL_DEFAULT_SENDER='alex@reckerfamily.com',
+)
+
 mail = Mail(app)
 db = SQLAlchemy(app)
 
@@ -51,7 +56,7 @@ class Subscriber(db.Model):
         self.verified = True
 
     def send_verification_email(self):
-        link = url_for('verify', key=self.verify_key)
+        link = url_for('verify', key=self.verify_key, _external=True)
         return send_email(
             subject='Could you verify your email?',
             recipient=self.email,
@@ -60,7 +65,7 @@ class Subscriber(db.Model):
         )
 
     def send_newsletter_email(self, subject, message, connection):
-        link = url_for('unsubscribe', key=self.unsubscribe_key)
+        link = url_for('unsubscribe', key=self.unsubscribe_key, _external=True)
         return send_email(
             subject=subject,
             recipient=self.email,
@@ -133,5 +138,12 @@ def unsubscribe(key):
 
 
 if __name__ == '__main__':
+    app.config.update(
+        DEBUG=True,
+        SECRET_KEY='mail-o-mail-it-never-fails',
+        SERVER_NAME='127.0.0.1:5000',
+        APPLICATION_ROOT=None,
+        SQLALCHEMY_DATABASE_URI='sqlite:////tmp/test.db'
+    )
     db.create_all()
-    app.run(debug=True)
+    app.run()
